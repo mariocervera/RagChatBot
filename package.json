@@ -1,0 +1,29 @@
+{
+  "name": "ragchatbot",
+  "version": "1.0.0",
+  "description": "RAG ChatBot project for text processing and AI integration",
+  "type": "module",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "dev": "node main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "rag",
+    "chatbot",
+    "ai",
+    "text-processing",
+    "openai"
+  ],
+  "author": "Mario",
+  "license": "ISC",
+  "dependencies": {
+    "@ai-sdk/openai": "^0.0.66",
+    "dotenv": "^17.2.2",
+    "openai": "^5.20.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
