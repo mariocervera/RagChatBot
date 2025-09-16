@@ -1,14 +1,23 @@
 import { readFileSync } from 'fs';
 import { openai } from '@ai-sdk/openai';
 import 'dotenv/config';
+import { 
+    insertResource, 
+    insertMultipleEmbeddings, 
+} from './database.js';
 
-const inputFile = './context.txt';
+const contextFile = './context.txt';
 const embeddingModel = openai.embedding('text-embedding-3-small');
 
 async function main() {
-    const content = readFileSync(inputFile, 'utf8');
-    const embeddings = await generateEmbeddingsFromText(content);
-    printEmbeddings(embeddings);
+    try {
+        const fileContent = readFileSync(contextFile, 'utf8');
+        const embeddings = await generateEmbeddingsFromText(fileContent);
+        await storeInDatabase(fileContent, embeddings);
+        
+    } catch (error) {
+        console.error('Error in main process:', error.message);
+    }
 }
 
 async function generateEmbeddingsFromText(text) {
@@ -38,17 +47,19 @@ async function generateEmbeddingsFromChunks(chunks) {
     }
 }
 
-function printEmbeddings(embeddings) {
-    console.log(`Generated ${embeddings.length} embeddings:`);
-    embeddings.forEach((item, index) => {
-        console.log(`Chunk ${index + 1}:`);
-        console.log(`Content: "${item.content}"`);
-        console.log(`Embedding dimensions: ${item.embedding.length}`);
-        console.log(`First 5 values: [${item.embedding.slice(0, 5).join(', ')}...]`);
-        console.log('-------------');
-    });
-}
+async function storeInDatabase(resource, embeddings) {
+    try {
 
+        const resourceId = await insertResource(resource);
+        const embeddingIds = await insertMultipleEmbeddings(resourceId, embeddings);
+        console.log(`Inserted ${embeddingIds.length} embeddings`);
+
+        
+    } catch (error) {
+        console.error('Error storing in database:', error.message);
+        throw error;
+    }
+}
 
 
 main().catch(console.error);
