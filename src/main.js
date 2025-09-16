@@ -6,7 +6,7 @@ import {
     insertMultipleEmbeddings, 
 } from './database.js';
 
-const contextFile = './context.txt';
+const contextFile = './resources/context.txt';
 const embeddingModel = openai.embedding('text-embedding-3-small');
 
 async function main() {
