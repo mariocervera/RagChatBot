@@ -5,9 +5,7 @@ const connection = neon(process.env.DATABASE_URL);
 
 export async function storeInVectorDatabase(resource, embeddings) {
     const resourceId = await insertResource(resource);
-    const embeddingIds = await insertEmbeddings(embeddings, resourceId);
-
-    console.log(`Inserted ${embeddingIds.length} embeddings`);
+    await insertEmbeddings(embeddings, resourceId);
 }
 
 async function insertResource(resourceContent) {
@@ -20,23 +18,17 @@ async function insertResource(resourceContent) {
 }
 
 async function insertEmbeddings(embeddings, resourceId) {
-    const embeddingIds = [];
-    
-    for (const item of embeddings) {
-        const embeddingId = await insertEmbedding(item.embedding, item.content, resourceId);
-        embeddingIds.push(embeddingId);
-    }
-    
-    return embeddingIds;
+    await Promise.all(
+        embeddings.map(embedding => insertEmbedding(embedding, resourceId))
+    );
 }
 
-async function insertEmbedding(embedding, content, resourceId) {
+async function insertEmbedding(embedding, resourceId) {
     const embeddingId = nanoid();
     
-    const result = await connection`
+    await connection`
         INSERT INTO embeddings (id, resource_id, content, embedding) 
-        VALUES (${embeddingId}, ${resourceId.toString()}, ${content}, ${JSON.stringify(embedding)}::vector) 
+        VALUES (${embeddingId}, ${resourceId.toString()}, ${embedding.plainText()}, ${JSON.stringify(embedding.array())}::vector) 
         RETURNING id
     `;
-    return result[0].id;
 }

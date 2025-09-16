@@ -1,4 +1,5 @@
 import { openai } from '@ai-sdk/openai';
+import { Embedding } from './Embedding.js'
 
 const embeddingModel = openai.embedding('text-embedding-3-small');
 
@@ -18,8 +19,7 @@ async function generateEmbeddingsFromChunks(chunks) {
         values: chunks,
     });
     
-    return embeddings.map((embedding, i) => ({
-        content: chunks[i],
-        embedding: embedding
-    }));
+    return embeddings.map((embedding, i) => 
+        new Embedding({ array: embedding, plainText: chunks[i] })
+    );
 }
