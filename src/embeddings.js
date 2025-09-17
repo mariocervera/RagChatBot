@@ -3,9 +3,9 @@ import { Embedding } from './Embedding.js'
 
 const embeddingModel = openai.embedding('text-embedding-3-small');
 
-export async function generateEmbeddingsFromText(text) {
+export async function generateEmbeddingsForChunks(text) {
     const chunks = chunk(text);
-    return await generateEmbeddingsFromChunks(chunks);
+    return await embedMultiple(chunks);
 }
 
 function chunk(text) {
@@ -14,12 +14,16 @@ function chunk(text) {
         .filter(word => word.length > 0);
 }
 
-async function generateEmbeddingsFromChunks(chunks) {
-    const { embeddings } = await embeddingModel.doEmbed({
-        values: chunks,
-    });
-    
-    return embeddings.map((embedding, i) => 
-        new Embedding({ array: embedding, plainText: chunks[i] })
+async function embedMultiple(chunks) {
+    return Promise.all(
+        chunks.map((chunk) => embedSingle(chunk))
     );
+}
+
+async function embedSingle(chunk) {
+    const { embeddings } = await embeddingModel.doEmbed({
+        values: [chunk],
+    });
+
+    return new Embedding({ array: embeddings[0], plainText: chunk })
 }
