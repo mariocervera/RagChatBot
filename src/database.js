@@ -1,4 +1,5 @@
 import { neon } from '@neondatabase/serverless';
+import { embedSingle } from './embeddings.js';
 import { nanoid } from 'nanoid';
 
 const connection = neon(process.env.DATABASE_URL);
@@ -32,3 +33,23 @@ async function insertEmbedding(embedding, resourceId) {
         RETURNING id
     `;
 }
+
+export async function findRelevantContent(query) {
+    const embedding = await embedSingle(query);
+    const topK = 3
+
+    const result = await connection`
+      SELECT r.content as resource_content,
+             e.content as embedding_content,
+             1 - (e.embedding <=>${toStringLiteral(embedding.array())}::vector) AS similarity
+      FROM embeddings e JOIN resources r ON r.id = e.resource_id::int
+      ORDER BY similarity desc
+      LIMIT ${topK};
+    `;
+
+    return result.map(row => row.resource_content);
+  }
+
+  function toStringLiteral(array) {
+    return `[${array.join(",")}]`;
+  }

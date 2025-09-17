@@ -20,7 +20,7 @@ async function embedMultiple(chunks) {
     );
 }
 
-async function embedSingle(chunk) {
+export async function embedSingle(chunk) {
     const { embeddings } = await embeddingModel.doEmbed({
         values: [chunk],
     });
