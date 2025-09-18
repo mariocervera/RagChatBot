@@ -34,7 +34,8 @@ async function insertEmbedding(embedding, resourceId) {
     `;
 }
 
-export async function findRelevantContent(query) {
+export async function findRelevantContent(queryJSON) {
+    const query = queryJSON["query"]
     const embedding = await embedSingle(query);
     const topK = 3
 
