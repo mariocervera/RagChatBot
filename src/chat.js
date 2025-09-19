@@ -2,40 +2,42 @@ import { tools } from "./toolDefinitions.js"
 import {findRelevantContent} from "./database.js"
 import OpenAI from "openai";
 
+const model = "gpt-4.1-mini"
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+let modelInput = []
 
 export async function respondTo(query) {
+    modelInput = addUserText(modelInput, query)
+    let modelOutput = await callModelToGetDataForToolCall(modelInput)
+    const toolResult = await applyFunctionCall(modelOutput)
+    modelInput = addAssistantText(modelInput, toolResult)
+    modelOutput = await callModelToGetTextualResponse(modelInput)
 
-    const client = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY
-    });
-    
-    let input = [
-        {"role": "user", "content": query}
-    ]
+    return modelOutput.output_text
+}
 
-    let response = await client.responses.create({
-        model: "gpt-4.1-mini",
-        tools: tools,
-        input,
-        tool_choice: "required"
-    })
+function addUserText(conversation_array, text) {
+    return [...conversation_array, { "role": "user", "content": text }]
+}
 
-    for (const item of response.output) {
+function addAssistantText(conversation_array, text) {
+    return [...conversation_array, { "role": "assistant", "content": JSON.stringify(text) }]
+}
+
+async function callModelToGetDataForToolCall(input) {
+    return await client.responses.create({ model, tools, input, tool_choice: "required" })
+}
+
+async function callModelToGetTextualResponse(input) {
+    return await client.responses.create({ model, tools, input })
+}
+
+async function applyFunctionCall(modelOutput) {
+    for (const item of modelOutput.output) {
         if (item.type == "function_call" && item.name == "findRelevantContent") {
             const args = JSON.parse(item.arguments)
-            const relevantContent = await findRelevantContent(args)
-            input.push({
-                role: "assistant",
-                content: JSON.stringify(relevantContent)
-            });
+            return await findRelevantContent(args)
         }
-      };
-      
-      const finalResponse = await client.responses.create({
-        model: "gpt-4.1-mini",
-        tools: tools,
-        input: input
-      });
-      
-      return finalResponse.output_text
+    };
 }
