@@ -6,10 +6,11 @@ const model = "gpt-4.1-mini"
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 let modelInput = []
+let modelOutput = undefined
 
-export async function respondTo(query) {
+export async function respondUsingTool(query) {
     modelInput = addUserText(modelInput, query)
-    let modelOutput = await callModelToGetDataForToolCall(modelInput)
+    modelOutput = await callModelToGetDataForToolCall(modelInput)
     const toolResult = await applyFunctionCall(modelOutput)
     modelInput = addAssistantText(modelInput, toolResult)
     modelOutput = await callModelToGetTextualResponse(modelInput)

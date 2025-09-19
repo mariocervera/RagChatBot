@@ -4,7 +4,7 @@ import { nanoid } from 'nanoid';
 
 const connection = neon(process.env.DATABASE_URL);
 
-export async function storeInVectorDatabase(resource, embeddings) {
+export async function storeEmbeddingsInVectorDatabase(resource, embeddings) {
     const resourceId = await insertResource(resource);
     await insertEmbeddings(embeddings, resourceId);
 }
