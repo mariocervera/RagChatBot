@@ -6,7 +6,7 @@ This project demonstrates Retrieval-Augmented Generation (RAG) using the OpenAI 
 
 The file called `context.txt` contains information that is relevant to the user's query.
 
-The content of this file is divided into chunks and embedded using an embedding model (in this case, `text-embedding-3-small`). The embeddings are stored in a vector database, which allows us to retrieve content that is relevant to the user's query by embedding the query using the same model and performing a **vector similarity search**.
+The content of this file is divided into chunks and embedded using an embedding model. The embeddings are stored in a vector database, which allows us to retrieve content that is relevant to the user's query by embedding the query using the same model and performing a **vector similarity search**.
 
 ## Query answering flow
 
